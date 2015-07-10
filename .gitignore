@@ -1,4 +1,5 @@
 # Object files
+run_me
 *.o
 *.ko
 *.obj

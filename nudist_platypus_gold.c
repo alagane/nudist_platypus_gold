@@ -6,12 +6,12 @@
 
 #include <ncurses.h>
 
-#define CHAR_TAB_SIZE 5
-#define PRINT_TAB_SIZE 1000
+#define CHAR_TAB_SIZE 7
+#define PRINT_TAB_SIZE 100000
 #define TIME_TO_SLEEP 100000
 
 int main(void) {
-	char tab[CHAR_TAB_SIZE] = {'O', 'o', '*', '.', ' '};
+	char tab[CHAR_TAB_SIZE] = {'O', 'o', '*', '.', '.', '.', ' '};
 	int x[PRINT_TAB_SIZE] = {1, 2, 3, 4},
 		y[PRINT_TAB_SIZE] = {1, 2, 3, 4},
 		step[PRINT_TAB_SIZE] = {0, -1, -2, -3};
@@ -27,7 +27,7 @@ int main(void) {
 
 	srand(time(&t));
 	
-	for (j = 0; j < 10; j++) {
+	for (j = 0; j < 1000; j++) {
 		int decal = rand() % width;
 		for (i = 0; i < 100; i++) {
 			decal = decal + rand() % 3 - 1;
