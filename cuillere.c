@@ -7,8 +7,8 @@
 #include <ncurses.h>
 
 #define CAT_SIZE 5
-#define NB_CATS 1
-#define TIME_TO_SLEEP 500000
+#define NB_CATS 100
+#define TIME_TO_SLEEP 100000
 
 typedef struct {
 	int tail;
@@ -39,41 +39,45 @@ void cat_move(Cat *c) {
 	c->dir = (c->dir + 7 + rand() % 3) % 8; // Turn left, right or don't turn.
 	switch (c->dir) {
 		case 0:
-			c->x[c->tail]++; // TODO Replace all lines with dependancies from old head.
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] + 1; // TODO Replace all lines with dependancies from old head.
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE];
 			break;
 		case 1:
-			c->x[c->tail]++;
-			c->y[c->tail]--;
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] + 1;
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] - 1;
 			break;
 		case 2:
-			c->y[c->tail]--;
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE];
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] - 1;
 			break;
 		case 3:
-			c->x[c->tail]--;
-			c->y[c->tail]--;
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] - 1;
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] - 1;
 			break;
 		case 4:
-			c->x[c->tail]--;
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] - 1;
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE];
 			break;
 		case 5:
-			c->x[c->tail]--;
-			c->y[c->tail]++;
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] - 1;
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] + 1;
 			break;
 		case 6:
-			c->y[c->tail]++;
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE];
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] + 1;
 			break;
 		case 7:
-			c->x[c->tail]++;
-			c->y[c->tail]++;
+			c->x[c->tail] = c->x[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] + 1;
+			c->y[c->tail] = c->y[(c->tail - 1 + CAT_SIZE) % CAT_SIZE] + 1;
 			break;
 	}
 
 	c->tail = (c->tail + 1) % CAT_SIZE;
 
-	for (i = c->tail; i != (c->tail - 1 + CAT_SIZE) % CAT_SIZE; i = (i + 1) % CAT_SIZE) {
-		mvprintw(c->y[i], c->x[i], ".");
+	for (i = 0; i < CAT_SIZE - 1; i++) {
+		mvprintw(c->y[(i + c->tail) % CAT_SIZE], c->x[(i + c->tail) % CAT_SIZE], i == CAT_SIZE - 2 ? "o" : ".");
 	}
-	mvprintw(c->y[i], c->x[i], "O");
+	mvprintw(c->y[(i + c->tail) % CAT_SIZE], c->x[(i + c->tail) % CAT_SIZE], "O");
 }
 
 void cat_debug(Cat *c) {
