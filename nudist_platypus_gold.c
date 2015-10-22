@@ -3,11 +3,12 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <ncurses.h>
 
-#define PLATYPUS_SIZE 30
-#define NB_PLATYPUS 100
+#define PLATYPUS_SIZE 7
+#define NB_PLATYPUS 10
 #define NB_COLORS 7
 #define TIME_TO_SLEEP 100000
 
@@ -20,8 +21,8 @@ typedef struct {
 
 void platypus_init(Platypus *p, int width, int height) {
 	int i,
-		x = width / 2,//rand() % width,
-		y = height / 2;//rand() % height;
+		x = width / 2, //rand() % width,
+		y = height / 2; //rand() % height;
 
 	p->tail = 0;
 	p->dir = rand() % 8;
@@ -94,16 +95,39 @@ void platypus_debug(Platypus *p) {
 	printf("\n");
 }
 
-int main(int argc, int argv[]) {
+void print_usage() {
+	printf("Usage: nudist_platypus_gold [option]\n");
+	printf("\t--help\tPrint this message.\n");
+	printf("\t-c\tColors, colors everywhere!\n");
+}
+
+int main(int argc, char *argv[]) {
 	Platypus platypus[NB_PLATYPUS];
 	int colors[NB_COLORS];
 	time_t t;
-
-	int param_color = 1;
-
-	int i = 0;
-	while (i < NB_COLORS) {
-		colors[i] = ++i;
+	int color_flag = 0;
+	/*int platypus_size = PLATYPUS_SIZE,
+		nb_platypus = NB_PLATYPUS,
+		time_to_sleep = TIME_TO_SLEEP;*/
+	int i;
+		
+	// TODO Parse more than one argument, then more than one option in one argument
+	if (argc == 2) { // 1 argument
+		if (!strcmp(argv[1],"--help")) {
+			print_usage();
+			return 0;
+		} else if (!strcmp(argv[1],"-c")) {
+			color_flag = 1;
+		}/* else if (!strcmp(argv[1],"-C")) {
+			changing_color_flag = 1;
+		}*/
+	}
+	
+	if (color_flag) {
+		i = 0;
+		while (i < NB_COLORS) {
+			colors[i] = ++i;
+		}
 	}
 
 	struct winsize w;
@@ -116,7 +140,7 @@ int main(int argc, int argv[]) {
 	
 	initscr();
 	curs_set(0);
-	if (param_color) {
+	if (color_flag) {
 		if(has_colors() == FALSE) {
 			endwin();
 			printf("Your terminal does not support color, don't use -c option.\n");
