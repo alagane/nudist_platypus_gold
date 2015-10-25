@@ -7,11 +7,12 @@
 
 #include <ncurses.h>
 
-#define PLATYPUS_SIZE 7
-#define NB_PLATYPUS 10
+#define PLATYPUS_SIZE 42
+#define NB_PLATYPUS 20
 #define NB_COLORS 7
 #define TIME_TO_SLEEP 100000
 
+// Platypus, tail to head (...*oO)
 typedef struct {
 	int tail;
 	int dir;
@@ -33,8 +34,9 @@ void platypus_init(Platypus *p, int width, int height) {
 	}
 }
 
-void platypus_move(Platypus *p) {
+void platypus_move(Platypus *p, char *pattern) {
 	int i;
+	int pattern_length = strlen(pattern);
 
 	mvprintw(p->y[p->tail], p->x[p->tail], " ");
 
@@ -76,10 +78,15 @@ void platypus_move(Platypus *p) {
 
 	p->tail = (p->tail + 1) % PLATYPUS_SIZE;
 
-	for (i = 0; i < PLATYPUS_SIZE - 1; i++) {
-		mvprintw(p->y[(i + p->tail) % PLATYPUS_SIZE], p->x[(i + p->tail) % PLATYPUS_SIZE], i == PLATYPUS_SIZE - 3 ? "*": i == PLATYPUS_SIZE - 2 ? "o" : ".");
+	for (i = 0; i < PLATYPUS_SIZE; i++) {
+		// Platypus example : 012345678 (PLATYPUS_SIZE = 9)
+		// Pattern example : Oo*. (pattern_length = 4)
+		if (i < PLATYPUS_SIZE - pattern_length) {
+			mvprintw(p->y[(i + p->tail) % PLATYPUS_SIZE], p->x[(i + p->tail) % PLATYPUS_SIZE], ".");
+		} else {
+			mvprintw(p->y[(i + p->tail) % PLATYPUS_SIZE], p->x[(i + p->tail) % PLATYPUS_SIZE], "%c", pattern[PLATYPUS_SIZE - i - 1]);
+		}
 	}
-	mvprintw(p->y[(i + p->tail) % PLATYPUS_SIZE], p->x[(i + p->tail) % PLATYPUS_SIZE], "O");
 }
 
 void platypus_debug(Platypus *p) {
@@ -104,29 +111,31 @@ void print_usage() {
 int main(int argc, char *argv[]) {
 	Platypus platypus[NB_PLATYPUS];
 	int colors[NB_COLORS];
+	char *pattern = "";
 	time_t t;
 	int color_flag = 0;
 	/*int platypus_size = PLATYPUS_SIZE,
 		nb_platypus = NB_PLATYPUS,
 		time_to_sleep = TIME_TO_SLEEP;*/
 	int i;
-		
+	
 	// TODO Parse more than one argument, then more than one option in one argument
-	if (argc == 2) { // 1 argument
-		if (!strcmp(argv[1],"--help")) {
+	for (i = 1; i < argc; i++) {
+		if (!strcmp(argv[i],"--help")) {
 			print_usage();
 			return 0;
-		} else if (!strcmp(argv[1],"-c")) {
+		} else if (!strcmp(argv[i],"-c")) {
 			color_flag = 1;
 		}/* else if (!strcmp(argv[1],"-C")) {
 			changing_color_flag = 1;
-		}*/
+		}*/ else {
+			pattern = argv[i];
+		}
 	}
 	
 	if (color_flag) {
-		i = 0;
-		while (i < NB_COLORS) {
-			colors[i] = ++i;
+		for (i = 0; i < NB_COLORS; i++) {
+			colors[i] = i+1;
 		}
 	}
 
@@ -159,7 +168,7 @@ int main(int argc, char *argv[]) {
 	while (1) {
 		for (i = 0; i < NB_PLATYPUS; i++) {
 			attron(COLOR_PAIR(i % NB_COLORS + 1));
-			platypus_move(&platypus[i]);
+			platypus_move(&platypus[i], pattern);
 			attroff(COLOR_PAIR(i % NB_COLORS + 1));
 			//platypus_debug(&platypus[i]);
 		}
