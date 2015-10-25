@@ -8,7 +8,7 @@
 #include <ncurses.h>
 
 #define PLATYPUS_SIZE 42
-#define NB_PLATYPUS 20
+#define NB_PLATYPUS 3
 #define NB_COLORS 7
 #define TIME_TO_SLEEP 100000
 
@@ -34,7 +34,7 @@ void platypus_init(Platypus *p, int width, int height) {
 	}
 }
 
-void platypus_move(Platypus *p, char *pattern) {
+void platypus_move(Platypus *p, char *pattern, int width, int height) {
 	int i;
 	int pattern_length = strlen(pattern);
 
@@ -74,6 +74,11 @@ void platypus_move(Platypus *p, char *pattern) {
 			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
 			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
 			break;
+	}
+
+	if (p->x[p->tail] >= width || p->x[p->tail] < 0 || p->y[p->tail] >= height || p->y[p->tail] < 0) {
+		p->x[p->tail] = width / 2;
+		p->y[p->tail] = height / 2;
 	}
 
 	p->tail = (p->tail + 1) % PLATYPUS_SIZE;
@@ -168,7 +173,7 @@ int main(int argc, char *argv[]) {
 	while (1) {
 		for (i = 0; i < NB_PLATYPUS; i++) {
 			attron(COLOR_PAIR(i % NB_COLORS + 1));
-			platypus_move(&platypus[i], pattern);
+			platypus_move(&platypus[i], pattern, width, height);
 			attroff(COLOR_PAIR(i % NB_COLORS + 1));
 			//platypus_debug(&platypus[i]);
 		}
