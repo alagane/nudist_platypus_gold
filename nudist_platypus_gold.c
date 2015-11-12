@@ -7,7 +7,8 @@
 
 #include <ncurses.h>
 
-#define PLATYPUS_LENGTH 10
+#define PLATYPUS_LENGTH 7
+#define PLATYPUS_PATTERN "Oo....*"
 #define NB_PLATYPUS 20
 #define NB_COLORS 7
 #define TIME_TO_SLEEP 100000
@@ -128,10 +129,10 @@ void print_usage() {
 int main(int argc, char *argv[]) {
 	Platypus platypus[NB_PLATYPUS];
 	int colors[NB_COLORS];
-	char *pattern = "";
+	char *pattern = PLATYPUS_PATTERN;
 	time_t t;
 	int color_flag = 0;
-	int platypus_length;
+	int platypus_length = PLATYPUS_LENGTH;
 		/*nb_platypus = NB_PLATYPUS,
 		time_to_sleep = TIME_TO_SLEEP;*/
 	int i;
