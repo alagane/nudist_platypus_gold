@@ -7,28 +7,40 @@
 
 #include <ncurses.h>
 
-#define PLATYPUS_SIZE 42
-#define NB_PLATYPUS 3
+#define PLATYPUS_LENGTH 10
+#define NB_PLATYPUS 20
 #define NB_COLORS 7
 #define TIME_TO_SLEEP 100000
+
+/*
+TODO
+Fix color bugs
+Add custom colors
+Choose an option syntax
+*/
 
 // Platypus, tail to head (...*oO)
 typedef struct {
 	int tail;
 	int dir;
-	int x[PLATYPUS_SIZE];
-	int y[PLATYPUS_SIZE];
+	int *x;
+	int *y;
+	int length;
 } Platypus;
 
-void platypus_init(Platypus *p, int width, int height) {
+void platypus_init(Platypus *p, int width, int height, int length) {
 	int i,
 		x = width / 2, //rand() % width,
 		y = height / 2; //rand() % height;
 
 	p->tail = 0;
 	p->dir = rand() % 8;
+	
+	p->x = malloc(length * sizeof (int));
+	p->y = malloc(length * sizeof (int));
+	p->length = length;
 
-	for (i = 0; i < PLATYPUS_SIZE; i++) {
+	for (i = 0; i < length; i++) {
 		p->x[i] = x;
 		p->y[i] = y;
 	}
@@ -43,36 +55,36 @@ void platypus_move(Platypus *p, char *pattern, int width, int height) {
 	p->dir = (p->dir + 7 + rand() % 3) % 8; // Turn left, right or don't turn.
 	switch (p->dir) {
 		case 0:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE];
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length] + 1;
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length];
 			break;
 		case 1:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] - 1;
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length] + 1;
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length] - 1;
 			break;
 		case 2:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE];
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] - 1;
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length];
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length] - 1;
 			break;
 		case 3:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] - 1;
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] - 1;
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length] - 1;
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length] - 1;
 			break;
 		case 4:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] - 1;
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE];
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length] - 1;
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length];
 			break;
 		case 5:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] - 1;
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length] - 1;
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length] + 1;
 			break;
 		case 6:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE];
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length];
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length] + 1;
 			break;
 		case 7:
-			p->x[p->tail] = p->x[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
-			p->y[p->tail] = p->y[(p->tail - 1 + PLATYPUS_SIZE) % PLATYPUS_SIZE] + 1;
+			p->x[p->tail] = p->x[(p->tail - 1 + p->length) % p->length] + 1;
+			p->y[p->tail] = p->y[(p->tail - 1 + p->length) % p->length] + 1;
 			break;
 	}
 
@@ -81,15 +93,15 @@ void platypus_move(Platypus *p, char *pattern, int width, int height) {
 		p->y[p->tail] = height / 2;
 	}
 
-	p->tail = (p->tail + 1) % PLATYPUS_SIZE;
+	p->tail = (p->tail + 1) % p->length;
 
-	for (i = 0; i < PLATYPUS_SIZE; i++) {
-		// Platypus example : 012345678 (PLATYPUS_SIZE = 9)
+	for (i = 0; i < p->length; i++) {
+		// Platypus example : 012345678 (p->length = 9)
 		// Pattern example : Oo*. (pattern_length = 4)
-		if (i < PLATYPUS_SIZE - pattern_length) {
-			mvprintw(p->y[(i + p->tail) % PLATYPUS_SIZE], p->x[(i + p->tail) % PLATYPUS_SIZE], ".");
+		if (i < p->length - pattern_length) {
+			mvprintw(p->y[(i + p->tail) % p->length], p->x[(i + p->tail) % p->length], ".");
 		} else {
-			mvprintw(p->y[(i + p->tail) % PLATYPUS_SIZE], p->x[(i + p->tail) % PLATYPUS_SIZE], "%c", pattern[PLATYPUS_SIZE - i - 1]);
+			mvprintw(p->y[(i + p->tail) % p->length], p->x[(i + p->tail) % p->length], "%c", pattern[p->length - i - 1]);
 		}
 	}
 }
@@ -101,7 +113,7 @@ void platypus_debug(Platypus *p) {
 	printf(" dir: %d\n", p->dir);
 	printf(" tail: %d\n", p->tail);
 	printf(" x,y :");
-	for (i = 0; i < PLATYPUS_SIZE; i++) {
+	for (i = 0; i < p->length; i++) {
 		printf(" (%d,%d)", p->x[i], p->y[i]);
 	}
 	printf("\n");
@@ -119,8 +131,8 @@ int main(int argc, char *argv[]) {
 	char *pattern = "";
 	time_t t;
 	int color_flag = 0;
-	/*int platypus_size = PLATYPUS_SIZE,
-		nb_platypus = NB_PLATYPUS,
+	int platypus_length;
+		/*nb_platypus = NB_PLATYPUS,
 		time_to_sleep = TIME_TO_SLEEP;*/
 	int i;
 	
@@ -135,6 +147,10 @@ int main(int argc, char *argv[]) {
 			changing_color_flag = 1;
 		}*/ else {
 			pattern = argv[i];
+			platypus_length = strlen(pattern);
+			if (platypus_length < 1) {
+				platypus_length = PLATYPUS_LENGTH;
+			}
 		}
 	}
 	
@@ -167,7 +183,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	for (i = 0; i < NB_PLATYPUS; i++) {
-		platypus_init(&platypus[i], width, height);
+		platypus_init(&platypus[i], width, height, platypus_length);
 	}
 
 	while (1) {
